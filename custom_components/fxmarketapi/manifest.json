@@ -1,0 +1,8 @@
+{
+    "domain": "fxmarketapi",
+    "name": "FXMarketAPI",
+    "documentation": "https://github.com/rob196/home-assistant-fxmarketapii",
+    "dependencies": [],
+    "codeowners": ["@rob196"],
+    "requirements": []
+  }

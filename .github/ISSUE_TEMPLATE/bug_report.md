@@ -7,32 +7,47 @@ assignees: ''
 
 ---
 
+<!-- Before you open a new issue, search through the existing issues to see if others have had the same problem.
+
+Issues not containing the minimum requirements will be closed:
+
+- Issues without a description (using the header is not good enough) will be closed.
+- Issues without debug logging will be closed.
+- Issues without configuration will be closed
+
+-->
+
+## Version of the custom_component
+<!-- If you are not using the newest version, download and try that before opening an issue
+If you are unsure about the version check the const.py file.
+-->
+
+## Configuration
+
+```yaml
+
+Add your configuration here.
+
+```
+
 **Describe the bug**
 A clear and concise description of what the bug is.
 
-**To Reproduce**
-Steps to reproduce the behavior:
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
+## Debug log
+
+<!-- To enable debug logs check this https://www.home-assistant.io/components/logger/ -->
+
+```text
+
+Add your logs here.
+
+```
 
 **Expected behavior**
 A clear and concise description of what you expected to happen.
 
 **Screenshots**
 If applicable, add screenshots to help explain your problem.
-
-**Desktop (please complete the following information):**
- - OS: [e.g. iOS]
- - Browser [e.g. chrome, safari]
- - Version [e.g. 22]
-
-**Smartphone (please complete the following information):**
- - Device: [e.g. iPhone6]
- - OS: [e.g. iOS8.1]
- - Browser [e.g. stock browser, safari]
- - Version [e.g. 22]
 
 **Additional context**
 Add any other context about the problem here.

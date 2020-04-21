@@ -1,0 +1,6 @@
+{
+    "name": "FXMarketAPI Integration",
+    "content_in_root": false,
+    "render_readme": false,
+    "domains": ["sensor"]
+}
