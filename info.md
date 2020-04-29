@@ -1,4 +1,4 @@
-{% if installed %}
+{% if installed and version_available.replace("v", "").replace(".","")  > version_installed.replace("v", "").replace(".","")  %}
 ## Changes as compared to your installed version:
 
 ### Breaking Changes
@@ -10,12 +10,18 @@
 ### Bugfixes
 
 ---
+{% elif if installed and version_available.replace("v", "").replace(".","")  = version_installed.replace("v", "").replace(".","") %}
+
+**You are running the latest version!**
+
+---
 {% endif %}
 
 # FXMarketAPI Sensor Component
 This is a Custom Component for [Home-Assistant](https://home-assistant.io), it fetches live mid-rates using [FXMarketAPI](https://fxmarketapi.com/).
 
 **NOTE:** You will need an FXMarketAPI account, you can sign up for free [here](https://fxmarketapi.com/signup).
+
 **NOTE:** Not all currencies are available, to check the available currencies see this page [here](https://fxmarketapi.com/currencies).
 
 ## Configuration Options:

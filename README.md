@@ -1,4 +1,4 @@
-[![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/custom-components/hacs)  [![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/) [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.me/robalexanderza/)
+[![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/custom-components/hacs)  [![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/) [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.me/robalexanderza/)
 
 # FXMarketAPI Sensor Component
 This is a Custom Component for [Home-Assistant](https://home-assistant.io), it fetches live mid-rates using [FXMarketAPI](https://fxmarketapi.com/).
@@ -11,33 +11,34 @@ This is a Custom Component for [Home-Assistant](https://home-assistant.io), it f
 
 ### HACS - Recommended
 - Have [HACS](https://hacs.xyz) installed, this will allow you to easily manage and track updates.
-- Open HACS and click 'Settings' tab
-- Under Custom Repositories, add:
-  - Repository: https://github.com/rob196/home-assistant-fxmarketapi
-  - Category: Integration
-- Click the 'Save' button
-- Go to the 'Integrations' tab
-- Search for 'FXMarketAPI'.
+- Open HACS and click 'Integrations' tab
+- Search for 'FXMarketAPI Integration'.
+- Click 'FXMarketAPI Integration'.
 - Click Install below the found integration.
 - Configure using the configuration instructions below.
 - Restart Home-Assistant.
 
 ### Manual
-- Copy directory `custom_components/fxmarketapi` to your `<config dir>/custom_components` directory.
-- Configure with config below.
+- Download the latest [Release](https://github.com/rob196/home-assistant-fxmarketapi/releases)
+- Open the dowloaded zip (or tar.gz)
+- Copy directory `custom_components/fxmarketapi` from, the zip file to your `<config dir>/custom_components` directory.
+- Configure with config like below.
 - Restart Home-Assistant.
 
 
 ## Usage
 To use this component in your installation, add the following to your `configuration.yaml` file:
 
+  **NOTE:** For more info on using secrets look [here](https://www.home-assistant.io/docs/configuration/secrets/).
+
 ```yaml
 # Example configuration.yaml entry
+# The below will call the FXMarketAPI every hour and add sensors for USD to ZAR and ZAR to USD
 
 sensor:
   - platform: fxmarketapi
     api_key: !secret fxmarketapi_key
-    scan_interval: 00:60:00
+    scan_interval: 01:00:00
     foreign_exchange:
       - name: USD to ZAR
         from: USD
