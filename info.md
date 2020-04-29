@@ -1,6 +1,5 @@
 {% if installed %}
-Version Installed: {{version_installed}}
-Version: {{version_available}}
+
 {% if version_available.replace("v", "").replace(".","") | int > version_installed.replace("v", "").replace(".","") | int %}
 
 ## Changes as compared to your installed version:
@@ -8,7 +7,9 @@ Version: {{version_available}}
 ### Breaking Changes
 
 ### Changes
+{% if version_installed.replace("v", "").replace(".","") | int < 101 %}
 - Updated documentation
+{% endif %}
 ### Features
 
 ### Bugfixes
