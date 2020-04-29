@@ -1,4 +1,4 @@
-{% if installed and version_available.replace("v", "").replace(".","")  > version_installed.replace("v", "").replace(".","")  %}
+{% if installed and version_available.replace("v", "").replace(".","") | int > version_installed.replace("v", "").replace(".","") | int %}
 ## Changes as compared to your installed version:
 
 ### Breaking Changes
@@ -10,7 +10,7 @@
 ### Bugfixes
 
 ---
-{% elif if installed and version_available.replace("v", "").replace(".","")  = version_installed.replace("v", "").replace(".","") %}
+{% elif if installed and version_available.replace("v", "").replace(".","") | int = version_installed.replace("v", "").replace(".","") | int %}
 
 **You are running the latest version!**
 
