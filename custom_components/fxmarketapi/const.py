@@ -2,7 +2,7 @@
 NAME = "FXMarketAPI"
 DOMAIN = "fxmarketapi"
 DOMAIN_DATA = f"{DOMAIN}_data"
-VERSION = "1.0.0"
+VERSION = "1.0.1"
 
 ISSUE_URL = "https://github.com/rob196/home-assistant-fxmarketapi/issues"
 
