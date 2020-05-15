@@ -13,6 +13,9 @@
 ### Features
 
 ### Bugfixes
+{% if version_installed.replace("v", "").replace(".","") | int < 102 %}
+ - Fix Detection of blocking I/O in the event loop
+{% endif %}
 
 ---
 

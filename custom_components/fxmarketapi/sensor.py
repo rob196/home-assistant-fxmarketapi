@@ -57,7 +57,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
 })
 
 
-async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
+def setup_platform(hass, config, add_entities, discovery_info=None):
     """Setup the FXMarketAPI sensors."""
 
     api_key = config[CONF_API_KEY]
@@ -108,7 +108,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     for conversion in conversions:
         dev.append(FXMarketAPISensor(conversion, updater))
 
-    async_add_entities(dev, True)
+    add_entities(dev, True)
 
     _LOGGER.info(STARTUP_MESSAGE)
 
