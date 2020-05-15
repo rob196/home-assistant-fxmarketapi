@@ -1,7 +1,5 @@
 {% if installed %}
 
-{% if version_available.replace("v", "").replace(".","") | int > version_installed.replace("v", "").replace(".","") | int %}
-
 ## Changes as compared to your installed version:
 
 ### Breaking Changes
@@ -18,14 +16,6 @@
 {% endif %}
 
 ---
-
-{% else %}
-
-**You are running the latest version!**
-
----
-
-{% endif %}
 
 {% endif %}
 
