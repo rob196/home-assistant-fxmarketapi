@@ -4,5 +4,6 @@
     "documentation": "https://github.com/rob196/home-assistant-fxmarketapii",
     "dependencies": [],
     "codeowners": ["@rob196"],
-    "requirements": []
+    "requirements": [],
+    "version": "1.0.3"
   }
