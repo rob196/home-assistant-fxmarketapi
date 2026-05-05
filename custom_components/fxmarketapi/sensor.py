@@ -19,11 +19,11 @@ import logging
 from datetime import timedelta
 from datetime import datetime
 import requests
-import json
 
 import voluptuous as vol
 
 from homeassistant.util import Throttle
+from homeassistant.components import persistent_notification
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 
 import homeassistant.helpers.config_validation as cv
@@ -57,6 +57,16 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
 })
 
 
+def create_notification(hass, message, title):
+    """Create a persistent notification from this sync platform setup."""
+    hass.loop.call_soon_threadsafe(
+        persistent_notification.async_create,
+        hass,
+        message,
+        title,
+    )
+
+
 def setup_platform(hass, config, add_entities, discovery_info=None):
     """Setup the FXMarketAPI sensors."""
 
@@ -64,46 +74,50 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
     scan_interval = config.get(CONF_SCAN_INTERVAL)
     conversions = config.get(CONF_FOREIGN_EXCHANGE, [])
     min_scan_interval = timedelta(minutes=1)
-    
+
     if not conversions:
         msg = "No currencies configured."
-        hass.components.persistent_notification.create(msg, f"Sensor {NAME}")
+        create_notification(hass, msg, f"Sensor {NAME}")
         _LOGGER.warning(msg)
         return
 
     if scan_interval < min_scan_interval:
         msg = f"Scan interval must be at least 1 minute (i.e. 00:00:01) - Configured Value: {scan_interval}. Configuration will use the default scan interval and continue."
-        hass.components.persistent_notification.create(msg, f"Sensor {NAME}")
+        create_notification(hass, msg, f"Sensor {NAME}")
         _LOGGER.warning(msg)
         scan_interval = DEFAULT_SCAN_INTERVAL
-    
-    apiCurrencies = ""
+
+    api_currencies = []
     for conversion in conversions:
-        apiCurrencies += conversion[CONF_FROM] + conversion[CONF_TO] + ","
-    apiCurrencies = apiCurrencies[:-1]
+        api_currencies.append([conversion[CONF_FROM], conversion[CONF_TO]])
 
-    _LOGGER.debug(f"{DEFAULT_NAME}: Scan Interval: {scan_interval}, API Currencies: {apiCurrencies}")
 
-    updater = FXMarketAPIUpdater(api_key, scan_interval, apiCurrencies)
+    _LOGGER.info(f"{DEFAULT_NAME}: Scan Interval: {scan_interval}, API Currencies: {api_currencies}")
+
+    updater = FXMarketAPIUpdater(api_key, scan_interval, api_currencies)
     updater.update()
     if updater.data is None:
         if updater.error_msg is None:
             updater.error_msg = "Unhandled Error"
-        hass.components.persistent_notification.create(f"{updater.error_msg}. Please investigate logs.", f"Sensor {NAME}")
+        create_notification(hass, f"{updater.error_msg}. Please investigate logs.", f"Sensor {NAME}")
         raise Exception(f"{DEFAULT_NAME}: Invalid configuration for {NAME} platform. Error Message: {updater.error_msg}")
     else:
         _LOGGER.debug(f"{DEFAULT_NAME}: Returned Data: {updater.data}")
-        if updater.data["timestamp"] is None:
-            hass.components.persistent_notification.create(f"No timestamp data returned from API. Please investigate logs.", f"Sensor {NAME}")
+        if "error" in updater.data:
+            error_info = updater.data["error"].get("info", updater.data["error"])
+            create_notification(hass, f"FXMarketAPI error: {error_info}. Please investigate logs.", f"Sensor {NAME}")
+            raise Exception(f"{DEFAULT_NAME}: FXMarketAPI returned an error for {NAME} platform. Data: {updater.data}")
+        if updater.data.get("timestamp") is None:
+            create_notification(hass, f"No timestamp data returned from API. Please investigate logs.", f"Sensor {NAME}")
             raise Exception(f"{DEFAULT_NAME}: No timestamp data returned from API for {NAME} platform. Data: {updater.data}")
-        if updater.data["price"] is None:
-            hass.components.persistent_notification.create(f"No price data returned from API. Please investigate logs.", f"Sensor {NAME}")
+        if updater.data.get("price") is None:
+            create_notification(hass, f"No price data returned from API. Please investigate logs.", f"Sensor {NAME}")
             raise Exception(f"{DEFAULT_NAME}: No price data returned from API for {NAME} platform. Data: {updater.data}")
         if updater.data["price"] is not None:
             if "error" in updater.data["price"]:
-                hass.components.persistent_notification.create(f"Invalid Currencies Specified. Please investigate logs.", f"Sensor {NAME}")
+                create_notification(hass, f"Invalid Currencies Specified. Please investigate logs.", f"Sensor {NAME}")
                 raise Exception(f"{DEFAULT_NAME}: Invalid Currencies Specified for {NAME} platform. Data: updater.data['price']")
-        
+
     dev = []
     for conversion in conversions:
         dev.append(FXMarketAPISensor(conversion, updater))
@@ -125,7 +139,7 @@ class FXMarketAPISensor(Entity):
         else:
             self._name = f"fxmarketapi_{self._to_currency}_{self._from_currency}"
 
-        self._unique_id = f"fxmarketapi_{self._to_currency}_{self._from_currency}"    
+        self._unique_id = f"fxmarketapi_{self._to_currency}_{self._from_currency}"
         self._api_name = f"{self._from_currency}{self._to_currency}"
         self._unit_of_measurement = self._to_currency
         self._timestamp = datetime(1900, 1, 1)
@@ -165,7 +179,7 @@ class FXMarketAPISensor(Entity):
         if self._updater.data is not None:
             self._timestamp = datetime.fromtimestamp(self._updater.data["timestamp"])
             self._state = self._updater.data["price"][self._api_name]
-            
+
         return self._state
 
 
@@ -183,7 +197,7 @@ class FXMarketAPISensor(Entity):
 
     def update(self):
         self._updater.update()
-            
+
 
 class FXMarketAPIUpdater:
     def __init__(self, api_key, scan_interval, api_currencies):
@@ -195,12 +209,31 @@ class FXMarketAPIUpdater:
 
     def _update(self):
         self.error_msg = None
-        address = f"{API_URL}?api_key={self.api_key}&currency={self._api_currencies}"
-        loggingURL = f"{API_URL}?api_key=XXXXX&currency={self._api_currencies}"
-        _LOGGER.debug(f"{DEFAULT_NAME}: URL: {loggingURL}")
-        response = requests.get(address)
-        if response.status_code == 200 and response.content.__len__() > 0:
-            self.data =  response.json()
-        else:
-            msg = f"Error retrieving data. Status Code: {response.status_code}"
-            self.error_msg = msg
+        data = {"timestamp": None, "price": {}}
+
+        for from_currency, to_currency in self._api_currencies:
+            params = {
+                "api_key": self.api_key,
+                "from": from_currency,
+                "to": to_currency,
+                "amount": 1,
+            }
+            logging_params = dict(params, api_key="XXXXX")
+            _LOGGER.debug(f"{DEFAULT_NAME}: URL: {API_URL}, Params: {logging_params}")
+            response = requests.get(API_URL, params=params)
+            if response.status_code != 200 or response.content.__len__() == 0:
+                msg = f"Error retrieving data. Status Code: {response.status_code}"
+                self.error_msg = msg
+                self.data = None
+                return
+
+            conversion_data = response.json()
+            if "error" in conversion_data:
+                self.data = conversion_data
+                return
+
+            api_name = f"{from_currency}{to_currency}"
+            data["price"][api_name] = conversion_data.get("price")
+            data["timestamp"] = conversion_data.get("timestamp", data["timestamp"])
+
+        self.data = data

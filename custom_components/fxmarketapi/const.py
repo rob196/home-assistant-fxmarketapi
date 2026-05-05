@@ -29,7 +29,7 @@ If you have any issues with this you need to open an issue here:
 -------------------------------------------------------------------
 """
 
-API_URL = 'https://fxmarketapi.com/apilive'
+API_URL = 'https://fxmarketapi.com/apiconvert'
 
 ICONS = {
     "AED": "mdi:currency-usd",	# "United Arab Emirates Dirham"
